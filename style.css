@@ -1,0 +1,52 @@
+:root {
+  --escura: #2c5b69;
+  --clara: #d3dfdc;
+  --destaque: #e59f2f;
+  --captura: #d2513c;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+#tabuleiro {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: min(92vw, 480px);
+  border: 4px solid var(--escura);
+}
+
+.casa {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.escura { background: var(--escura); cursor: pointer; }
+.clara  { background: var(--clara); }
+
+.peca {
+  width: 78%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+}
+.branca { background: #f5f0e4; box-shadow: inset 0 0 0 3px #b9b19c; color: #8a6a1c; }
+.preta  { background: #232a30; box-shadow: inset 0 0 0 3px #0c1013; color: var(--destaque); }
+
+.selecionada { outline: 3px solid var(--destaque); outline-offset: -3px; }
+.destino::after,
+.destino-captura::after {
+  content: "";
+  position: absolute;
+  width: 28%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--destaque);
+}
+.destino-captura::after { background: var(--captura); }
