@@ -52,7 +52,20 @@ function mostrarTabuleiro() {
 }
 
 function aoClicar(i, j) {
-  console.log('clicou em', i, j);
+  if (!jogo || jogo.fim) return;
+
+  const alvo = jogo.destinos.find(d => d.x === i && d.y === j);
+
+  if (jogo.selecionada && alvo) {
+    executarMovimento(alvo);
+  } else if (ehDoJogador(jogo.tabuleiro[i][j], jogo.jogadorAtual) && !jogo.emCadeia) {
+    jogo.selecionada = [i, j];
+    jogo.destinos = movimentosDaPeca(i, j);
+  } else if (!jogo.emCadeia) {
+    jogo.selecionada = null;
+    jogo.destinos = [];
+  }
+  mostrarTabuleiro();
 }
 
 function dentro(x, y) {
@@ -92,6 +105,14 @@ function movimentosDaPeca(x, y) {
   return lista;
 }
 
+function executarMovimento(alvo) {
+  const [x1, y1] = jogo.selecionada;
+  jogo.tabuleiro[alvo.x][alvo.y] = jogo.tabuleiro[x1][y1];
+  jogo.tabuleiro[x1][y1] = '.';
+  jogo.selecionada = null;
+  jogo.destinos = [];
+  jogo.jogadorAtual = outroJogador(jogo.jogadorAtual);
+}
 
 inicializarTabuleiro();
 inicializarTabuleiro();
