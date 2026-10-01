@@ -37,6 +37,14 @@ function mostrarTabuleiro() {
       const casa = document.createElement('div');
       casa.className = 'casa ' + ((i + j) % 2 === 1 ? 'escura' : 'clara');
 
+      if (jogo.selecionada && jogo.selecionada[0] === i && jogo.selecionada[1] === j) {
+        casa.classList.add('selecionada');
+      }
+      const destino = jogo.destinos.find(d => d.x === i && d.y === j);
+      if (destino) {
+        casa.classList.add(destino.captura ? 'destino-captura' : 'destino');
+      }
+
       const peca = jogo.tabuleiro[i][j];
       if (peca !== '.' && peca !== ' ') {
         const p = document.createElement('span');
