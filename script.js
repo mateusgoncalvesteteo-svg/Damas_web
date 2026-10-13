@@ -108,6 +108,11 @@ function movimentosDaPeca(x, y) {
     const q = jogo.tabuleiro[i][j];
     if (q === '.') {
       lista.push({ x: i, y: j, captura: null });
+    } else if (q === '.') {
+      lista.push({ x: i, y: j, captura: null });
+    } else if (ehInimiga(q, jogador) && dentro(i + dx, j + dy) && jogo.tabuleiro[i + dx][j + dy] === '.') {
+      // inimigo na diagonal e casa vazia logo depois: dá para pular
+      lista.push({ x: i + dx, y: j + dy, captura: [i, j] });
     }
   }
   return lista;
@@ -115,10 +120,36 @@ function movimentosDaPeca(x, y) {
 
 function executarMovimento(alvo) {
   const [x1, y1] = jogo.selecionada;
-  jogo.tabuleiro[alvo.x][alvo.y] = jogo.tabuleiro[x1][y1];
+  const peca = jogo.tabuleiro[x1][y1];
+
   jogo.tabuleiro[x1][y1] = '.';
+  if (alvo.captura) {
+    jogo.tabuleiro[alvo.captura[0]][alvo.captura[1]] = '.';
+  }
+
+  // promoção a dama
+  let nova = peca;
+  if (peca === 'B' && alvo.x === 0) nova = 'D';
+  if (peca === 'P' && alvo.x === 7) nova = 'Q';
+  jogo.tabuleiro[alvo.x][alvo.y] = nova;
+
+  registrarJogada(x1, y1, alvo.x, alvo.y, alvo.captura !== null);
+
   jogo.selecionada = null;
   jogo.destinos = [];
+  passarTurno();
+}
+
+function registrarJogada(x1, y1, x2, y2, captura) {
+  jogo.historico.push({
+    rodada: jogo.historico.length + 1,
+    jogador: jogo.jogadorAtual,
+    x1, y1, x2, y2,
+    captura: captura
+  });
+}
+
+function passarTurno() {
   jogo.jogadorAtual = outroJogador(jogo.jogadorAtual);
 }
 
