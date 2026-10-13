@@ -96,23 +96,40 @@ function outroJogador(jogador) {
 function movimentosDaPeca(x, y) {
   const peca = jogo.tabuleiro[x][y];
   const jogador = ehDoJogador(peca, 'B') ? 'B' : 'P';
+  const ehDama = peca === 'D' || peca === 'Q';
 
-  const direcoes = jogador === 'B' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]];
+  const direcoes = ehDama
+    ? [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+    : (jogador === 'B' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]]);
+
   const lista = [];
 
   for (const [dx, dy] of direcoes) {
-    const i = x + dx;
-    const j = y + dy;
-    if (!dentro(i, j)) continue;
+    let i = x + dx;
+    let j = y + dy;
 
-    const q = jogo.tabuleiro[i][j];
-    if (q === '.') {
-      lista.push({ x: i, y: j, captura: null });
-    } else if (q === '.') {
-      lista.push({ x: i, y: j, captura: null });
-    } else if (ehInimiga(q, jogador) && dentro(i + dx, j + dy) && jogo.tabuleiro[i + dx][j + dy] === '.') {
-      // inimigo na diagonal e casa vazia logo depois: dá para pular
-      lista.push({ x: i + dx, y: j + dy, captura: [i, j] });
+    if (ehDama) {
+      // anda pela diagonal casa por casa
+      let capturada = null;
+      while (dentro(i, j)) {
+        const q = jogo.tabuleiro[i][j];
+        if (q === '.') {
+          lista.push({ x: i, y: j, captura: capturada });
+        } else if (ehDoJogador(q, jogador) || capturada) {
+          break; // bateu numa aliada, ou tentou pular duas peças
+        } else {
+          capturada = [i, j]; // primeira inimiga encontrada
+        }
+        i += dx;
+        j += dy;
+      }
+    } else if (dentro(i, j)) {
+      const q = jogo.tabuleiro[i][j];
+      if (q === '.') {
+        lista.push({ x: i, y: j, captura: null });
+      } else if (ehInimiga(q, jogador) && dentro(i + dx, j + dy) && jogo.tabuleiro[i + dx][j + dy] === '.') {
+        lista.push({ x: i + dx, y: j + dy, captura: [i, j] });
+      }
     }
   }
   return lista;
