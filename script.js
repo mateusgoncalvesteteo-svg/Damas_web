@@ -68,7 +68,7 @@ function aoClicar(i, j) {
     executarMovimento(alvo);
   } else if (ehDoJogador(jogo.tabuleiro[i][j], jogo.jogadorAtual) && !jogo.emCadeia) {
     jogo.selecionada = [i, j];
-    jogo.destinos = movimentosDaPeca(i, j);
+    jogo.destinos = movimentosPermitidos(i, j);
   } else if (!jogo.emCadeia) {
     jogo.selecionada = null;
     jogo.destinos = [];
@@ -152,6 +152,17 @@ function executarMovimento(alvo) {
 
   registrarJogada(x1, y1, alvo.x, alvo.y, alvo.captura !== null);
 
+    if (alvo.captura) {
+    const proximas = movimentosDaPeca(alvo.x, alvo.y).filter(m => m.captura);
+    if (proximas.length > 0) {
+      jogo.emCadeia = true;
+      jogo.selecionada = [alvo.x, alvo.y];
+      jogo.destinos = proximas;
+      return; // ainda é a vez do mesmo jogador
+    }
+  }
+  jogo.emCadeia = false;
+
   jogo.selecionada = null;
   jogo.destinos = [];
   passarTurno();
@@ -168,6 +179,25 @@ function registrarJogada(x1, y1, x2, y2, captura) {
 
 function passarTurno() {
   jogo.jogadorAtual = outroJogador(jogo.jogadorAtual);
+}
+
+function jogadorTemCaptura(jogador) {
+  for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < 8; y++) {
+      if (ehDoJogador(jogo.tabuleiro[x][y], jogador)) {
+        if (movimentosDaPeca(x, y).some(m => m.captura)) return true;
+      }
+    }
+  }
+  return false;
+}
+
+function movimentosPermitidos(x, y) {
+  const lista = movimentosDaPeca(x, y);
+  if (jogo.emCadeia || jogadorTemCaptura(jogo.jogadorAtual)) {
+    return lista.filter(m => m.captura);
+  }
+  return lista;
 }
 
 inicializarTabuleiro();
