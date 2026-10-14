@@ -73,7 +73,7 @@ function aoClicar(i, j) {
     jogo.selecionada = null;
     jogo.destinos = [];
   }
-  mostrarTabuleiro();
+  mostrarTudo();
 }
 
 function dentro(x, y) {
@@ -178,7 +178,56 @@ function registrarJogada(x1, y1, x2, y2, captura) {
 }
 
 function passarTurno() {
-  jogo.jogadorAtual = outroJogador(jogo.jogadorAtual);
+  const proximo = outroJogador(jogo.jogadorAtual);
+  if (contarPecas(proximo) === 0) {
+    terminarPartida(jogo.jogadorAtual, 'capturou todas as peças');
+    return;
+  }
+  if (!jogadorTemMovimentos(proximo)) {
+    terminarPartida(jogo.jogadorAtual, 'adversário sem movimentos');
+    return;
+  }
+  jogo.jogadorAtual = proximo;
+}
+
+function terminarPartida(vencedor, motivo) {
+  jogo.fim = { vencedor: vencedor, motivo: motivo };
+}
+
+function desistir() {
+  if (!jogo || jogo.fim) return;
+  terminarPartida(outroJogador(jogo.jogadorAtual), 'desistência');
+  mostrarTudo();
+}
+
+function atualizarPainel() {
+  const vez = document.getElementById('vez');
+  const aviso = document.getElementById('aviso');
+
+  if (jogo.fim) {
+    vez.textContent = 'Fim de jogo';
+    aviso.textContent = jogo.nomes[jogo.fim.vencedor] + ' venceu: ' + jogo.fim.motivo + '.';
+  } else {
+    vez.textContent = 'Vez de ' + jogo.nomes[jogo.jogadorAtual] +
+      (jogo.jogadorAtual === 'B' ? ' (brancas)' : ' (pretas)');
+    if (jogo.emCadeia) aviso.textContent = 'Continue capturando com a mesma peça.';
+    else if (jogadorTemCaptura(jogo.jogadorAtual)) aviso.textContent = 'Captura obrigatória.';
+    else aviso.textContent = '';
+  }
+
+  document.getElementById('placar').textContent =
+    'Brancas: ' + contarPecas('B') + ' | Pretas: ' + contarPecas('P');
+  document.getElementById('btn-desistir').hidden = jogo.fim !== null;
+  document.getElementById('btn-nova').hidden = jogo.fim === null;
+
+  const lista = document.getElementById('historico-partida');
+  lista.innerHTML = '';
+  for (const m of [...jogo.historico].reverse()) {
+    const li = document.createElement('li');
+    li.textContent = m.jogador + ' (' + m.x1 + ',' + m.y1 + ') → (' + m.x2 + ',' + m.y2 + ')' +
+      (m.captura ? ' [CAPTURA]' : '');
+    lista.appendChild(li);
+  }
 }
 
 function jogadorTemCaptura(jogador) {
@@ -200,6 +249,34 @@ function movimentosPermitidos(x, y) {
   return lista;
 }
 
+function contarPecas(jogador) {
+  let quantidade = 0;
+  for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < 8; y++) {
+      if (ehDoJogador(jogo.tabuleiro[x][y], jogador)) quantidade++;
+    }
+  }
+  return quantidade;
+}
+
+function jogadorTemMovimentos(jogador) {
+  for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < 8; y++) {
+      if (ehDoJogador(jogo.tabuleiro[x][y], jogador) && movimentosDaPeca(x, y).length > 0) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function mostrarTudo() {
+  mostrarTabuleiro();
+  atualizarPainel();
+}
+
+document.getElementById('btn-desistir').addEventListener('click', desistir);
+
 inicializarTabuleiro();
 inicializarTabuleiro();
-mostrarTabuleiro();
+mostrarTudo();

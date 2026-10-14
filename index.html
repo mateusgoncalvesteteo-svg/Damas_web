@@ -8,7 +8,17 @@
 </head>
 <body>
   <h1>Damas</h1>
-  <div id="tabuleiro"></div>
+    <div class="jogo">
+    <div id="tabuleiro"></div>
+    <aside class="painel">
+      <p id="vez"></p>
+      <p id="placar"></p>
+      <p id="aviso"></p>
+      <button id="btn-desistir">Desistir</button>
+      <button id="btn-nova" hidden>Nova partida</button>
+      <ol id="historico-partida" reversed></ol>
+    </aside>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
