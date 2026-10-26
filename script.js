@@ -1,10 +1,11 @@
-
 let jogo = null;
 
 function inicializarTabuleiro() {
   const tabuleiro = [];
+
   for (let i = 0; i < 8; i++) {
     const linha = [];
+
     for (let j = 0; j < 8; j++) {
       if ((i + j) % 2 === 1) {
         if (i < 3) linha.push('P');
@@ -14,6 +15,7 @@ function inicializarTabuleiro() {
         linha.push(' ');
       }
     }
+
     tabuleiro.push(linha);
   }
 
@@ -36,22 +38,34 @@ function mostrarTabuleiro() {
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
       const casa = document.createElement('div');
+
       casa.className = 'casa ' + ((i + j) % 2 === 1 ? 'escura' : 'clara');
 
-      if (jogo.selecionada && jogo.selecionada[0] === i && jogo.selecionada[1] === j) {
+      if (
+        jogo.selecionada &&
+        jogo.selecionada[0] === i &&
+        jogo.selecionada[1] === j
+      ) {
         casa.classList.add('selecionada');
       }
 
       const destino = jogo.destinos.find(d => d.x === i && d.y === j);
+
       if (destino) {
         casa.classList.add(destino.captura ? 'destino-captura' : 'destino');
       }
 
       const peca = jogo.tabuleiro[i][j];
+
       if (peca !== '.' && peca !== ' ') {
         const p = document.createElement('span');
+
         p.className = 'peca ' + (peca === 'B' || peca === 'D' ? 'branca' : 'preta');
-        if (peca === 'D' || peca === 'Q') p.textContent = '♛';
+
+        if (peca === 'D' || peca === 'Q') {
+          p.textContent = '♛';
+        }
+
         casa.appendChild(p);
       }
 
@@ -68,7 +82,10 @@ function aoClicar(i, j) {
 
   if (jogo.selecionada && alvo) {
     executarMovimento(alvo);
-  } else if (ehDoJogador(jogo.tabuleiro[i][j], jogo.jogadorAtual) && !jogo.emCadeia) {
+  } else if (
+    ehDoJogador(jogo.tabuleiro[i][j], jogo.jogadorAtual) &&
+    !jogo.emCadeia
+  ) {
     jogo.selecionada = [i, j];
     jogo.destinos = movimentosPermitidos(i, j);
   } else if (!jogo.emCadeia) {
@@ -85,6 +102,7 @@ function dentro(x, y) {
 
 function ehDoJogador(peca, jogador) {
   if (jogador === 'B') return peca === 'B' || peca === 'D';
+
   return peca === 'P' || peca === 'Q';
 }
 
@@ -112,7 +130,6 @@ function movimentosDaPeca(x, y) {
     let j = y + dy;
 
     if (ehDama) {
-      // Anda pela diagonal casa por casa.
       let capturada = null;
 
       while (dentro(i, j)) {
@@ -157,8 +174,8 @@ function executarMovimento(alvo) {
     jogo.tabuleiro[alvo.captura[0]][alvo.captura[1]] = '.';
   }
 
-  // Promoção a dama.
   let nova = peca;
+
   if (peca === 'B' && alvo.x === 0) nova = 'D';
   if (peca === 'P' && alvo.x === 7) nova = 'Q';
 
@@ -188,7 +205,10 @@ function registrarJogada(x1, y1, x2, y2, captura) {
   jogo.historico.push({
     rodada: jogo.historico.length + 1,
     jogador: jogo.jogadorAtual,
-    x1, y1, x2, y2,
+    x1,
+    y1,
+    x2,
+    y2,
     captura: captura
   });
 }
@@ -210,10 +230,12 @@ function passarTurno() {
 }
 
 function terminarPartida(vencedor, motivo) {
+  jogo.fim = { vencedor: vencedor, motivo: motivo };
+
   const nome = jogo.nomes[vencedor];
+
   atualizarPerfil(nome);
   salvarHistoricoPartida(nome);
-  jogo.fim = { vencedor: vencedor, motivo: motivo };
 }
 
 function desistir() {
@@ -229,14 +251,20 @@ function atualizarPainel() {
 
   if (jogo.fim) {
     vez.textContent = 'Fim de jogo';
-    aviso.textContent = jogo.nomes[jogo.fim.vencedor] + ' venceu: ' + jogo.fim.motivo + '.';
+    aviso.textContent =
+      jogo.nomes[jogo.fim.vencedor] + ' venceu: ' + jogo.fim.motivo + '.';
   } else {
-    vez.textContent = 'Vez de ' + jogo.nomes[jogo.jogadorAtual] +
+    vez.textContent =
+      'Vez de ' + jogo.nomes[jogo.jogadorAtual] +
       (jogo.jogadorAtual === 'B' ? ' (brancas)' : ' (pretas)');
 
-    if (jogo.emCadeia) aviso.textContent = 'Continue capturando com a mesma peça.';
-    else if (jogadorTemCaptura(jogo.jogadorAtual)) aviso.textContent = 'Captura obrigatória.';
-    else aviso.textContent = '';
+    if (jogo.emCadeia) {
+      aviso.textContent = 'Continue capturando com a mesma peça.';
+    } else if (jogadorTemCaptura(jogo.jogadorAtual)) {
+      aviso.textContent = 'Captura obrigatória.';
+    } else {
+      aviso.textContent = '';
+    }
   }
 
   document.getElementById('placar').textContent =
@@ -251,7 +279,8 @@ function atualizarPainel() {
   for (const m of [...jogo.historico].reverse()) {
     const li = document.createElement('li');
 
-    li.textContent = m.jogador + ' (' + m.x1 + ',' + m.y1 + ') → (' +
+    li.textContent =
+      m.jogador + ' (' + m.x1 + ',' + m.y1 + ') → (' +
       m.x2 + ',' + m.y2 + ')' + (m.captura ? ' [CAPTURA]' : '');
 
     lista.appendChild(li);
@@ -285,7 +314,9 @@ function contarPecas(jogador) {
 
   for (let x = 0; x < 8; x++) {
     for (let y = 0; y < 8; y++) {
-      if (ehDoJogador(jogo.tabuleiro[x][y], jogador)) quantidade++;
+      if (ehDoJogador(jogo.tabuleiro[x][y], jogador)) {
+        quantidade++;
+      }
     }
   }
 
@@ -324,7 +355,6 @@ function salvarPerfis(perfis) {
   }
 }
 
-// Busca recursiva (mesma ideia do C++).
 function buscaRecursiva(perfis, nome, indice = 0) {
   if (indice >= perfis.length) return -1;
   if (perfis[indice].nome === nome) return indice;
@@ -336,13 +366,15 @@ function atualizarPerfil(nome) {
   const perfis = carregarPerfis();
   const i = buscaRecursiva(perfis, nome);
 
-  if (i !== -1) perfis[i].vitorias++;
-  else perfis.push({ nome: nome, vitorias: 1 });
+  if (i !== -1) {
+    perfis[i].vitorias++;
+  } else {
+    perfis.push({ nome: nome, vitorias: 1 });
+  }
 
   salvarPerfis(perfis);
 }
 
-// Bubble Sort, decrescente por vitórias.
 function ordenaRankingPorVitorias(perfis) {
   for (let i = 0; i < perfis.length - 1; i++) {
     for (let j = 0; j < perfis.length - i - 1; j++) {
@@ -362,7 +394,10 @@ function salvarHistoricoPartida(nome) {
       jogadas: jogo.historico
     };
 
-    localStorage.setItem('damas:historico:' + nome, JSON.stringify(registro));
+    localStorage.setItem(
+      'damas:historico:' + nome,
+      JSON.stringify(registro)
+    );
   } catch (e) {
     console.error('Erro ao salvar histórico', e);
   }

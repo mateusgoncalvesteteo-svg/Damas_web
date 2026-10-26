@@ -612,7 +612,7 @@ function atualizarPainel() {
 
 function mostrarTudo() {
   mostrarTabuleiro();
-  atualizarPainel();
+  atualizarPainel();"
 }
 
 document.getElementById('btn-desistir').addEventListener('click', desistir);
